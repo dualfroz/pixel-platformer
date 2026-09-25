@@ -15,6 +15,8 @@ toneTable = {
     "checkpoint": (1040, 120),
     "levelComplete": (760, 260),
     "spark": (520, 40),
+    "slash": (1240, 45),
+    "doorOpen": (240, 180),
 }
 
 

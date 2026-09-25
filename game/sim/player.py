@@ -1,6 +1,6 @@
 from .. import constants
 from .entity import Actor
-from .geometry import sign, approach
+from .geometry import Aabb, sign
 from . import physics
 from .inventory import Inventory
 
@@ -20,9 +20,11 @@ class Player(Actor):
         self.wallSliding = False
         self.onLadder = False
         self.jumpHeldPrev = False
+        self.attackTimer = 0
+        self.attackCooldown = 0
         self.inventory = Inventory()
         self.score = 0
-        self.coins = 0
+        self.berries = 0
         self.spawnX = float(x)
         self.spawnY = float(y)
 
@@ -31,6 +33,25 @@ class Player(Actor):
 
     def isInvulnerable(self):
         return self.iframes > 0 or self.dashTimer > 0
+
+    def isAttacking(self):
+        return self.attackTimer > 0
+
+    def attackBox(self):
+        top = self.centerY - constants.attackHeight * 0.5
+        if self.facing > 0:
+            return Aabb(self.right, top, constants.attackReach, constants.attackHeight)
+        return Aabb(self.left - constants.attackReach, top, constants.attackReach, constants.attackHeight)
+
+    def handleAttack(self, world, command):
+        if self.attackTimer > 0:
+            self.attackTimer -= 1
+        if self.attackCooldown > 0:
+            self.attackCooldown -= 1
+        if command.attack and self.attackCooldown == 0:
+            self.attackTimer = constants.attackFrames
+            self.attackCooldown = constants.attackCooldownFrames
+            world.playSound("slash", self.centerX)
 
     def setCheckpoint(self, x, y):
         self.spawnX = float(x)
@@ -43,6 +64,7 @@ class Player(Actor):
         self.vy = 0.0
         self.iframes = constants.iframesOnHit
         self.dashTimer = 0
+        self.attackTimer = 0
         self.alive = True
 
     def takeDamage(self, amount, sourceX, world):
@@ -72,9 +94,10 @@ class Player(Actor):
             self.iframes -= 1
         if self.dashCooldown > 0:
             self.dashCooldown -= 1
+        self.handleAttack(world, command)
 
         terrain = world.level
-        platforms = world.platforms
+        platforms = world.colliders
 
         self.updateLadder(world, command, terrain)
         if self.onLadder:

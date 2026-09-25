@@ -3,6 +3,7 @@ import os
 
 from ..constants import tileSize
 from .geometry import Aabb
+from .door import DoorSpawn, mergeDoorCells
 from .tiles import (
     AIR,
     asciiToTile,
@@ -67,6 +68,7 @@ class Level:
         self.items = []
         self.checkpoints = []
         self.platforms = []
+        self.doors = []
         self.exit = None
 
     def pixelWidth(self):
@@ -129,6 +131,7 @@ class Level:
             "items": [spawn.asDict() for spawn in self.items],
             "checkpoints": [list(point) for point in self.checkpoints],
             "platforms": [platform.asDict() for platform in self.platforms],
+            "doors": [door.asDict() for door in self.doors],
             "exit": list(self.exit) if self.exit else None,
         }
         if self.background is not None:
@@ -143,6 +146,7 @@ def parseAscii(name, rows):
     padded = [row.ljust(width) for row in rows]
     collision = [[AIR for _ in range(width)] for _ in padded]
     level = Level(name, collision)
+    doorCells = []
     for rowIndex, line in enumerate(padded):
         for colIndex, char in enumerate(line):
             if char in asciiToTile:
@@ -157,10 +161,13 @@ def parseAscii(name, rows):
                     level.checkpoints.append((px, py))
                 elif kind == "exit":
                     level.exit = (px, py)
-                elif kind in ("coin", "gem", "key", "heart"):
+                elif kind == "door":
+                    doorCells.append((colIndex, rowIndex))
+                elif kind in ("berry", "gem", "key", "heart"):
                     level.items.append(EntitySpawn(kind, px, py))
                 else:
                     level.enemies.append(EntitySpawn(kind, px, py))
+    level.doors = mergeDoorCells(doorCells, tileSize)
     if level.exit is None and level.checkpoints:
         level.exit = level.checkpoints[-1]
     return level
@@ -179,6 +186,11 @@ def levelToAscii(level):
         entityAt[(int(round(point[0] / tileSize)), int(round(point[1] / tileSize)))] = "checkpoint"
     if level.exit:
         entityAt[(int(round(level.exit[0] / tileSize)), int(round(level.exit[1] / tileSize)))] = "exit"
+    for door in level.doors:
+        col = int(round(door.x / tileSize))
+        firstRow = int(round(door.y / tileSize))
+        for row in range(firstRow, firstRow + int(round(door.h / tileSize))):
+            entityAt[(col, row)] = "door"
     kindToChar = {value: key for key, value in asciiEntities.items()}
     for rowIndex in range(level.rows):
         chars = []
@@ -219,6 +231,8 @@ def levelFromDict(record):
                 platform.get("oneWay", False),
             )
         )
+    for door in record.get("doors", []):
+        level.doors.append(DoorSpawn(door["x"], door["y"], door["w"], door["h"]))
     exitPoint = record.get("exit")
     level.exit = tuple(exitPoint) if exitPoint else None
     return level

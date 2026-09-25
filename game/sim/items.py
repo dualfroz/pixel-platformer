@@ -2,7 +2,7 @@ from ..constants import tileSize
 from .geometry import Aabb
 
 itemDefs = {
-    "coin": {"score": 100, "size": 12, "bob": True},
+    "berry": {"score": 100, "size": 12, "bob": True},
     "gem": {"score": 500, "size": 12, "bob": True},
     "key": {"score": 50, "size": 12, "bob": False},
     "heart": {"score": 0, "size": 14, "bob": True, "heal": 2},
@@ -15,7 +15,7 @@ class Collectible:
         self.x = float(x)
         self.y = float(y)
         self.collected = False
-        definition = itemDefs.get(kind, itemDefs["coin"])
+        definition = itemDefs.get(kind, itemDefs["berry"])
         self.size = definition["size"]
         self.score = definition["score"]
         self.heal = definition.get("heal", 0)
@@ -37,9 +37,9 @@ class Collectible:
         self.collected = True
         player.score += self.score
         world.score += self.score
-        if self.kind == "coin":
-            player.coins += 1
-            world.coins += 1
+        if self.kind == "berry":
+            player.berries += 1
+            world.berries += 1
         elif self.heal:
             player.heal(self.heal)
         player.inventory.add(self.kind)

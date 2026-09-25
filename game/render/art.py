@@ -1,61 +1,68 @@
 import pygame
 
 from ..constants import tileSize
-from .theme import tileFallback
+from . import theme
+from .terrainArt import buildTerrainSprites
+from .propArt import buildPropSprites
 
 playerPalette = {
-    "r": (216, 40, 0),
-    "s": (252, 188, 140),
-    "h": (100, 52, 16),
-    "o": (32, 56, 236),
-    "k": (0, 0, 0),
-    "y": (247, 213, 29),
+    "k": (34, 22, 30),
+    "o": (230, 118, 40),
+    "d": (160, 70, 26),
+    "c": (250, 232, 200),
+    "u": (120, 214, 232),
+    "b": (92, 58, 36),
+    "g": (40, 170, 150),
+    "t": (22, 112, 104),
+    "v": (150, 140, 84),
+    "y": (255, 214, 92),
 }
 
 playerPattern = [
-    "................",
-    "....rrrrrr......",
-    "...rrrrrrrrr....",
-    "...hhhssskss....",
-    "..hshsssksss....",
-    "..hhhssssksss...",
-    "..hhsssssssss...",
-    "....sssssss.....",
-    "...rrrrrrrr.....",
-    "..rrrrrrrrrr....",
-    ".ssrroooorrss...",
-    ".ssrooooooorss..",
-    "...ooyooyoo.....",
-    "...oooooooo.....",
-    "...ooo..ooo.....",
-    "..hhh....hhh....",
+    "......k...k.....",
+    ".....kdk.kdk....",
+    ".....kuubuuok...",
+    ".....kooooook...",
+    ".....koookoook..",
+    ".....koccccccck.",
+    ".kk...kcccccck..",
+    "kook..kooccok...",
+    "kcook.ggggggg...",
+    "kccook.tvvcvvk..",
+    ".kccooovvbccvok.",
+    "..kcooovbvccvvk.",
+    "...kkkbbbybbbk..",
+    ".......ood.ood..",
+    ".......odd.odd..",
+    "......bbbb.bbbb.",
 ]
 
-goombaPalette = {
-    "d": (60, 30, 10),
-    "m": (150, 75, 30),
-    "w": (255, 255, 255),
-    "k": (0, 0, 0),
-    "f": (20, 12, 8),
+beetlePalette = {
+    "k": (20, 18, 30),
+    "s": (40, 92, 70),
+    "m": (70, 150, 96),
+    "h": (170, 230, 150),
+    "e": (255, 196, 64),
+    "l": (60, 44, 34),
 }
 
-goombaPattern = [
+beetlePattern = [
     "................",
-    ".....dddddd.....",
-    "...ddmmmmmmdd...",
-    "..dmmmmmmmmmmd..",
-    ".dmmmmmmmmmmmmd.",
-    ".dmmwwmmmmwwmmd.",
-    ".dmmwkmmmmwkmmd.",
-    ".dmmwwmmmmwwmmd.",
-    ".dmmmmmmmmmmmmd.",
-    ".dmmmmmmmmmmmmd.",
-    "..dmmmmmmmmmmd..",
-    "...dmmmmmmmmd...",
-    "....dddddddd....",
-    "...ff....ff.....",
-    "..ffff..ffff....",
     "................",
+    "......kkkkk.....",
+    "....kkhhmmmkk...",
+    "...khhmmmmmmmk..",
+    "..khmmmmmmmmmsk.",
+    "..khmmmmmmmmmsk.",
+    "k.kmmmmmmmmmmsk.",
+    ".kkmmmmmmmmmssk.",
+    "..kmmmmmmmmsssk.",
+    ".kkkkkkkkkkkkkk.",
+    "kekkllllllllllk.",
+    "kkkllllllllllk..",
+    ".kkkkkkkkkkkkk..",
+    "..l..l..l..l....",
+    ".l..l..l..l.....",
 ]
 
 chaserPalette = {
@@ -115,11 +122,14 @@ def shooterSurface():
     return surf
 
 
-def coinSurface():
+def berrySurface():
     surf = pygame.Surface((tileSize, tileSize), pygame.SRCALPHA)
-    pygame.draw.ellipse(surf, (200, 160, 20), (3, 1, 10, 14))
-    pygame.draw.ellipse(surf, (247, 213, 29), (4, 2, 8, 12))
-    pygame.draw.rect(surf, (255, 245, 170), (6, 4, 1, 8))
+    pygame.draw.line(surf, theme.barkDark, (8, 1), (8, 3))
+    pygame.draw.polygon(surf, theme.leafColor, [(8, 2), (11, 0), (13, 1), (10, 3)])
+    for centerX, centerY in ((8, 6), (5, 11), (11, 11)):
+        pygame.draw.circle(surf, theme.berryShade, (centerX, centerY), 3)
+        pygame.draw.circle(surf, theme.berryBody, (centerX - 1, centerY - 1), 2)
+        surf.set_at((centerX - 1, centerY - 2), theme.berryLight)
     return surf
 
 
@@ -148,117 +158,26 @@ def heartSurface():
     return surf
 
 
-def solidTile(color, topColor):
+def flatTile(color):
     surf = pygame.Surface((tileSize, tileSize))
     surf.fill(color)
-    pygame.draw.rect(surf, topColor, (0, 0, tileSize, 3))
-    pygame.draw.line(surf, (0, 0, 0), (tileSize - 1, 0), (tileSize - 1, tileSize - 1))
-    return surf
-
-
-def brickSurface():
-    surf = pygame.Surface((tileSize, tileSize))
-    surf.fill((181, 94, 41))
-    mortar = (74, 38, 18)
-    pygame.draw.line(surf, mortar, (0, 0), (tileSize - 1, 0))
-    pygame.draw.line(surf, mortar, (0, 8), (tileSize - 1, 8))
-    pygame.draw.line(surf, mortar, (8, 1), (8, 7))
-    pygame.draw.line(surf, mortar, (0, 9), (0, tileSize - 1))
-    pygame.draw.line(surf, mortar, (15, 9), (15, tileSize - 1))
-    return surf
-
-
-def platformSurface():
-    surf = pygame.Surface((tileSize, tileSize), pygame.SRCALPHA)
-    pygame.draw.rect(surf, (217, 164, 65), (0, 0, tileSize, 6))
-    pygame.draw.rect(surf, (247, 213, 29), (1, 0, tileSize - 2, 2))
-    pygame.draw.line(surf, (150, 100, 30), (0, 6), (tileSize - 1, 6))
-    return surf
-
-
-def spikeSurface():
-    surf = pygame.Surface((tileSize, tileSize), pygame.SRCALPHA)
-    for base in (0, 5, 10):
-        pygame.draw.polygon(surf, (210, 214, 224), [(base, 15), (base + 3, 4), (base + 6, 15)])
-        pygame.draw.polygon(surf, (150, 156, 170), [(base + 3, 15), (base + 4, 8), (base + 5, 15)])
-    return surf
-
-
-def lavaSurface():
-    surf = pygame.Surface((tileSize, tileSize))
-    surf.fill((200, 60, 20))
-    pygame.draw.rect(surf, (255, 150, 40), (0, 0, tileSize, 4))
-    for spot in ((3, 8), (9, 6), (12, 11)):
-        surf.set_at(spot, (255, 220, 120))
-    return surf
-
-
-def ladderSurface(top):
-    surf = pygame.Surface((tileSize, tileSize), pygame.SRCALPHA)
-    rail = (150, 100, 50)
-    pygame.draw.rect(surf, rail, (3, 0, 2, tileSize))
-    pygame.draw.rect(surf, rail, (11, 0, 2, tileSize))
-    for y in (2, 7, 12):
-        pygame.draw.rect(surf, (190, 140, 80), (3, y, 10, 2))
-    if top:
-        pygame.draw.rect(surf, (190, 140, 80), (1, 0, 14, 2))
-    return surf
-
-
-def slopeSurface(ascendRight):
-    surf = pygame.Surface((tileSize, tileSize), pygame.SRCALPHA)
-    if ascendRight:
-        points = [(0, tileSize), (tileSize, 0), (tileSize, tileSize)]
-    else:
-        points = [(0, 0), (tileSize, tileSize), (0, tileSize)]
-    pygame.draw.polygon(surf, (150, 74, 18), points)
-    pygame.draw.polygon(surf, (222, 140, 80), points, 1)
-    return surf
-
-
-def pipeSurface(top, leftSide):
-    surf = pygame.Surface((tileSize, tileSize))
-    surf.fill((0, 168, 0))
-    if leftSide:
-        pygame.draw.rect(surf, (128, 232, 128), (2, 0, 3, tileSize))
-        pygame.draw.line(surf, (0, 96, 0), (0, 0), (0, tileSize - 1))
-    else:
-        pygame.draw.rect(surf, (72, 200, 72), (8, 0, 3, tileSize))
-        pygame.draw.rect(surf, (0, 96, 0), (13, 0, 3, tileSize))
-    if top:
-        pygame.draw.rect(surf, (0, 200, 0), (0, 0, tileSize, 6))
-        pygame.draw.rect(surf, (0, 96, 0), (0, 0, tileSize, 6), 1)
     return surf
 
 
 def buildSprites():
     sprites = {
         "player": patternSurface(playerPattern, playerPalette),
-        "goomba": patternSurface(goombaPattern, goombaPalette),
+        "beetle": patternSurface(beetlePattern, beetlePalette),
         "chaser": patternSurface(chaserPattern, chaserPalette),
         "flyer": flyerSurface(),
         "shooter": shooterSurface(),
-        "coin": coinSurface(),
+        "berry": berrySurface(),
         "gem": gemSurface(),
         "key": keySurface(),
         "heart": heartSurface(),
-        "ground": solidTile((198, 100, 29), (222, 140, 80)),
-        "dirt": solidTile((120, 72, 40), (150, 96, 56)),
-        "stone": solidTile((110, 110, 128), (150, 150, 168)),
-        "brick": brickSurface(),
-        "platform": platformSurface(),
-        "woodOneWay": platformSurface(),
-        "spike": spikeSurface(),
-        "lava": lavaSurface(),
-        "ladder": ladderSurface(False),
-        "ladderTop": ladderSurface(True),
-        "slopeRight": slopeSurface(True),
-        "slopeLeft": slopeSurface(False),
-        "pipeTL": pipeSurface(True, True),
-        "pipeTR": pipeSurface(True, False),
-        "pipeBL": pipeSurface(False, True),
-        "pipeBR": pipeSurface(False, False),
     }
-    for name, color in tileFallback.items():
-        sprites.setdefault(name, solidTile(color, color))
+    sprites.update(buildTerrainSprites())
+    sprites.update(buildPropSprites())
+    for name, color in theme.tileFallback.items():
+        sprites.setdefault(name, flatTile(color))
     return sprites

@@ -7,6 +7,7 @@ from .player import Player
 from .enemies import spawnEnemy
 from .items import Collectible
 from .movingPlatform import MovingPlatform
+from .door import Door
 from .particles import ParticleSystem
 from .audio import AudioBus
 from .camera import Camera
@@ -21,6 +22,9 @@ class World:
         self.enemies = [spawnEnemy(spawn) for spawn in self.level.enemies]
         self.items = [Collectible.fromSpawn(spawn) for spawn in self.level.items]
         self.platforms = [MovingPlatform.fromSpawn(spawn) for spawn in self.level.platforms]
+        self.doors = [Door.fromSpawn(spawn) for spawn in self.level.doors]
+        self.colliders = []
+        self.refreshColliders()
         self.projectiles = []
         self.particles = ParticleSystem(rng=self.rng)
         self.audio = AudioBus()
@@ -32,13 +36,16 @@ class World:
         )
         self.camera.focusOn(self.player.centerX, self.player.centerY)
         self.score = 0
-        self.coins = 0
+        self.berries = 0
         self.lives = constants.startingLives
         self.frame = 0
         self.gameOver = False
         self.completed = False
         self.active = True
         self.activatedCheckpoints = set()
+
+    def refreshColliders(self):
+        self.colliders = self.platforms + [door for door in self.doors if not door.open]
 
     def playSound(self, name, x=None):
         self.audio.play(name, x)
@@ -69,6 +76,8 @@ class World:
             if projectile.alive:
                 projectile.update(self)
 
+        self.resolveDoors()
+        self.resolveAttack()
         self.resolveEnemyCollisions()
         self.resolveProjectileCollisions()
         self.resolveItemCollisions()
@@ -91,6 +100,36 @@ class World:
         if platform is not None and platform in self.platforms:
             rider.x += platform.deltaX
             rider.y += platform.deltaY
+
+    def resolveDoors(self):
+        if not self.player.alive:
+            return
+        reach = self.player.aabb.inflated(1.0, 0.0)
+        for door in self.doors:
+            if door.open or not reach.intersects(door.aabb):
+                continue
+            if not self.player.inventory.consume("key"):
+                continue
+            door.open = True
+            self.refreshColliders()
+            self.playSound("doorOpen", door.x)
+            self.spawnBurst("dust", door.x + door.w * 0.5, door.y + door.h * 0.5, 8)
+
+    def resolveAttack(self):
+        player = self.player
+        if not player.alive or not player.isAttacking():
+            return
+        reach = player.attackBox()
+        for enemy in self.enemies:
+            if not enemy.alive or not enemy.slashable:
+                continue
+            if not reach.intersects(enemy.hurtBox()):
+                continue
+            enemy.onSlashed(self)
+            player.score += 100
+            self.score += 100
+            self.playSound("stomp", enemy.centerX)
+            self.camera.addShake(5, 1.5)
 
     def resolveEnemyCollisions(self):
         if not self.player.alive:

@@ -49,7 +49,7 @@ def runSmoke(totalFrames=640):
         "maxBottom": world.player.bottom,
         "minHp": world.player.hp,
         "damageTaken": 0,
-        "coins": 0,
+        "berries": 0,
         "framesRun": 0,
     }
     previousScoreFromStomp = 0
@@ -85,7 +85,7 @@ def runSmoke(totalFrames=640):
         stats["maxBottom"] = max(stats["maxBottom"], player.bottom)
         stats["minHp"] = min(stats["minHp"], player.hp)
 
-    stats["coins"] = world.coins
+    stats["berries"] = world.berries
     stats["enemiesLeft"] = len(world.enemies)
     stats["enemiesStart"] = len(world.level.enemies)
     stats["score"] = world.score
@@ -121,7 +121,7 @@ def main():
     print("  frames run          : %d" % stats["framesRun"])
     print("  enemies start/left  : %d / %d" % (stats["enemiesStart"], stats["enemiesLeft"]))
     print("  score               : %d" % stats["score"])
-    print("  coins collected     : %d" % stats["coins"])
+    print("  berries collected   : %d" % stats["berries"])
     print("  damage taken (hp)   : %d" % stats["damageTaken"])
     print("  min hp / lives      : %d / %d" % (stats["minHp"], stats["lives"]))
     print("  max player.bottom   : %.1f (floorTop=%d)" % (stats["maxBottom"], stats["floorTop"]))

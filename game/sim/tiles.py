@@ -28,10 +28,6 @@ tileRegistry = {
     "ladderTop": TileDef("ladderTop", ladder=True, oneWay=True),
     "slopeRight": TileDef("slopeRight", slope="ascendRight"),
     "slopeLeft": TileDef("slopeLeft", slope="ascendLeft"),
-    "pipeTL": TileDef("pipeTL", solid=True),
-    "pipeTR": TileDef("pipeTR", solid=True),
-    "pipeBL": TileDef("pipeBL", solid=True),
-    "pipeBR": TileDef("pipeBR", solid=True),
 }
 
 
@@ -48,10 +44,6 @@ asciiToTile = {
     "T": "ladderTop",
     "/": "slopeRight",
     "\\": "slopeLeft",
-    "L": "pipeTL",
-    "R": "pipeTR",
-    "l": "pipeBL",
-    "r": "pipeBR",
 }
 
 tileToAscii = {value: key for key, value in asciiToTile.items()}
@@ -59,16 +51,17 @@ tileToAscii = {value: key for key, value in asciiToTile.items()}
 
 asciiEntities = {
     "p": "playerSpawn",
-    "g": "goomba",
+    "b": "beetle",
     "c": "chaser",
     "f": "flyer",
     "s": "shooter",
-    "o": "coin",
+    "o": "berry",
     "G": "gem",
     "k": "key",
     "v": "heart",
     "@": "checkpoint",
     "E": "exit",
+    "|": "door",
 }
 
 

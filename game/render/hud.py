@@ -32,9 +32,12 @@ class Hud:
 
     def draw(self, surf, world):
         self.drawText(surf, "SCORE %06d" % world.score, (10, 8))
-        self.drawText(surf, "COINS x%02d" % world.coins, (surf.get_width() - 130, 8))
+        self.drawText(surf, "BERRIES x%02d" % world.berries, (surf.get_width() - 130, 8))
         self.drawText(surf, "LIVES %d" % world.lives, (surf.get_width() - 130, 30))
         self.drawHearts(surf, world.player.hp, world.player.maxHp)
+        keys = world.player.inventory.keys
+        if keys or world.doors:
+            self.drawText(surf, "KEYS x%d" % keys, (surf.get_width() - 130, 52))
 
     def drawOverlay(self, surf, mode):
         veil = pygame.Surface(surf.get_size(), pygame.SRCALPHA)

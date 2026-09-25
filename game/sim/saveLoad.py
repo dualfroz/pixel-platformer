@@ -7,7 +7,7 @@ def captureState(world):
         "level": world.level.name,
         "frame": world.frame,
         "score": world.score,
-        "coins": world.coins,
+        "berries": world.berries,
         "lives": world.lives,
         "gameOver": world.gameOver,
         "completed": world.completed,
@@ -22,7 +22,7 @@ def captureState(world):
             "maxHp": player.maxHp,
             "facing": player.facing,
             "score": player.score,
-            "coins": player.coins,
+            "berries": player.berries,
             "iframes": player.iframes,
             "airJumps": player.airJumps,
             "spawnX": player.spawnX,
@@ -30,6 +30,7 @@ def captureState(world):
             "inventory": player.inventory.asDict(),
         },
         "items": [item.collected for item in world.items],
+        "doors": [door.open for door in world.doors],
         "enemies": [
             {
                 "kind": enemy.kind,
@@ -59,7 +60,7 @@ def captureState(world):
 def applyState(world, state):
     world.frame = state["frame"]
     world.score = state["score"]
-    world.coins = state["coins"]
+    world.berries = state["berries"]
     world.lives = state["lives"]
     world.gameOver = state["gameOver"]
     world.completed = state["completed"]
@@ -76,7 +77,7 @@ def applyState(world, state):
     player.maxHp = saved["maxHp"]
     player.facing = saved["facing"]
     player.score = saved["score"]
-    player.coins = saved["coins"]
+    player.berries = saved["berries"]
     player.iframes = saved["iframes"]
     player.airJumps = saved["airJumps"]
     player.spawnX = saved["spawnX"]
@@ -85,6 +86,10 @@ def applyState(world, state):
 
     for item, collected in zip(world.items, state["items"]):
         item.collected = collected
+
+    for door, opened in zip(world.doors, state.get("doors", [])):
+        door.open = opened
+    world.refreshColliders()
 
     for enemy, record in zip(world.enemies, state["enemies"]):
         enemy.x = record["x"]

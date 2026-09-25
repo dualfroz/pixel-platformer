@@ -32,6 +32,11 @@ dashSpeed = 6.5
 dashFrames = 10
 dashCooldownFrames = 32
 
+attackFrames = 9
+attackCooldownFrames = 26
+attackReach = 14
+attackHeight = 12
+
 stompBounce = -5.4
 enemySpeed = 0.55
 chaserSpeed = 1.05

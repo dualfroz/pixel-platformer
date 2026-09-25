@@ -10,6 +10,7 @@ from .projectile import Projectile
 
 class Enemy(Actor):
     stompable = True
+    slashable = False
     hasGravity = True
     contactDamage = constants.contactDamage
     kind = "enemy"
@@ -30,12 +31,12 @@ class Enemy(Actor):
         self.vy += constants.gravity
         if self.vy > constants.maxFallSpeed:
             self.vy = constants.maxFallSpeed
-        physics.moveHorizontal(self, world.level, world.platforms)
+        physics.moveHorizontal(self, world.level, world.colliders)
         if (self.direction > 0 and self.onWallRight) or (self.direction < 0 and self.onWallLeft):
             self.direction *= -1
             self.vx = 0.0
         wasOnGround = self.onGround
-        physics.moveVertical(self, world.level, world.platforms)
+        physics.moveVertical(self, world.level, world.colliders)
         physics.resolveSlope(self, world.level, wasOnGround)
         self.facing = self.direction
         if self.onGround:
@@ -65,6 +66,11 @@ class Enemy(Actor):
             self.alive = False
         world.spawnBurst("stomp", self.centerX, self.centerY, 6)
 
+    def onSlashed(self, world):
+        self.hp = 0
+        self.alive = False
+        world.spawnBurst("stomp", self.centerX, self.centerY, 8)
+
 
 class PatrolState(State):
     name = "patrol"
@@ -74,8 +80,9 @@ class PatrolState(State):
         return None
 
 
-class Goomba(Enemy):
-    kind = "goomba"
+class Beetle(Enemy):
+    kind = "beetle"
+    slashable = True
 
     def initialState(self):
         return "patrol"
@@ -114,6 +121,7 @@ class ChaseState(State):
 
 class Chaser(Enemy):
     kind = "chaser"
+    slashable = True
 
     def __init__(self, x, y):
         super().__init__(x, y, 16, 16)
@@ -133,8 +141,8 @@ class FlyerHover(State):
         owner.x += owner.direction * constants.flyerSpeed
         owner.y = owner.baseY + math.sin(owner.hoverPhase) * 14.0
         box = owner.aabb
-        blockedRight = owner.direction > 0 and physics.touchingSolidSide(owner, world.level, world.platforms, 1)
-        blockedLeft = owner.direction < 0 and physics.touchingSolidSide(owner, world.level, world.platforms, -1)
+        blockedRight = owner.direction > 0 and physics.touchingSolidSide(owner, world.level, world.colliders, 1)
+        blockedLeft = owner.direction < 0 and physics.touchingSolidSide(owner, world.level, world.colliders, -1)
         if blockedRight or blockedLeft or owner.x < owner.patrolMin or owner.x > owner.patrolMax:
             owner.direction *= -1
             owner.x = min(max(owner.x, owner.patrolMin), owner.patrolMax)
@@ -252,12 +260,12 @@ class Shooter(Enemy):
             self.vy += constants.gravity
             if self.vy > constants.maxFallSpeed:
                 self.vy = constants.maxFallSpeed
-            physics.moveVertical(self, world.level, world.platforms)
+            physics.moveVertical(self, world.level, world.colliders)
         super().update(world)
 
 
 enemyFactory = {
-    "goomba": Goomba,
+    "beetle": Beetle,
     "chaser": Chaser,
     "flyer": Flyer,
     "shooter": Shooter,
@@ -265,5 +273,5 @@ enemyFactory = {
 
 
 def spawnEnemy(spawn):
-    factory = enemyFactory.get(spawn.kind, Goomba)
+    factory = enemyFactory.get(spawn.kind, Beetle)
     return factory(spawn.x, spawn.y)

@@ -5,7 +5,7 @@ particlePresets = {
     "jump": {"count": 4, "color": (230, 230, 230), "life": 16, "spread": 1.2, "gravity": 0.1, "up": -0.5},
     "dash": {"count": 6, "color": (120, 200, 255), "life": 14, "spread": 1.6, "gravity": 0.0, "up": 0.0},
     "stomp": {"count": 6, "color": (200, 120, 60), "life": 18, "spread": 2.0, "gravity": 0.2, "up": -1.0},
-    "pickup": {"count": 5, "color": (247, 213, 29), "life": 20, "spread": 1.4, "gravity": -0.05, "up": -1.2},
+    "pickup": {"count": 5, "color": (255, 150, 205), "life": 20, "spread": 1.4, "gravity": -0.05, "up": -1.2},
     "hurt": {"count": 8, "color": (220, 40, 40), "life": 22, "spread": 2.2, "gravity": 0.15, "up": -1.5},
     "spark": {"count": 4, "color": (255, 220, 120), "life": 10, "spread": 2.4, "gravity": 0.0, "up": 0.0},
     "alert": {"count": 3, "color": (255, 80, 80), "life": 16, "spread": 0.6, "gravity": -0.1, "up": -1.4},
